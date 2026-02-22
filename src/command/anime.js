@@ -96,7 +96,7 @@ function renderProgress(percent) {
 
 function sendFileWithRsync(host, folderServer) {
   const source = './' 
-  const destination = `${conf.user}@${host}:${conf.destination}/anime/${folderServer}`
+  const destination = `${conf.user}@${host}:${conf.destination}anime/${folderServer}`
 
   console.log("Host : ", chalk.gray(host))
   console.log("from : ", chalk.gray(source))
