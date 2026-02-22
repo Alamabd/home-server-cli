@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 const mainArg = process.argv[2]
 const { anime } = require("./src/command/anime.js");
-const replaceFileName = require("./src/command/replaceFileName");
-const rl = require("./src/utils/rl");
-const chalk = require("chalk")
+const chalk = require("chalk");
+const { rl } = require("./src/utils/rl.js");
 
 // Header
 console.log(chalk.gray("-".repeat(37)))
