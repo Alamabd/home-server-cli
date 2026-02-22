@@ -106,6 +106,7 @@ function sendFileWithRsync(host, folderServer) {
     '-az',
     '--info=progress2',
     '--chown=www-data:www-data',
+    '--chmod=D775,F664',
     source,
     destination
   ])
@@ -137,7 +138,7 @@ function sendFileWithRsync(host, folderServer) {
   })  
 }
 
-function sendToServer() {  
+async function sendToServer() {  
   const host = conf.host
 
   console.log(chalk.gray("-".repeat(31)))
@@ -152,27 +153,32 @@ function sendToServer() {
 
   console.log(chalk.gray("-".repeat(31)))
   console.log(chalk.red("Send anime.json to db server..."))
-  fetch(`http://${host}:3000/anime`, {
-    method: "POST",
-    body: data,
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  }).then(async value => {
-    console.log("Status: ", chalk.gray(value.status))
-    const response = await value.json()
 
-    if(value.status === 409) {
-      throw new Error(response.message)
+  try {
+    const request = await fetch(`http://${host}:3000/anime`, {
+        method: "POST",
+        body: data,
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    
+    console.log("Status: ", chalk.gray(request.status))
+    const response = await request.json()
+  
+    if(request.status === 409) {
+        console.log("Error: ", chalk.gray(response.message))
+        const ask = await askQuestion("Tetap kirim berkas files(y/t)? ")
+        if(ask.toLowerCase() !== "y") {
+            throw new Error(response.message)
+        }
     }
-
+  
     console.log("Message: ", chalk.gray(response.message))
-
-
     console.log(chalk.gray("-".repeat(31)))
     console.log(chalk.red("List file..."))
     const anime = JSON.parse(data)
-
+  
     fs.readdir("./", (err, file) => {
       file.forEach((val, idx) => {
         console.log(idx+1, ". ", chalk.gray(val))
@@ -184,7 +190,7 @@ function sendToServer() {
       }
       console.log(chalk.gray("-".repeat(31)))
       console.log(chalk.red("Prepare..."))
-
+  
       if(host) {
         sendFileWithRsync(host, anime.title.replaceAll(" ", ""))
       } else {
@@ -192,10 +198,10 @@ function sendToServer() {
         rl.close()
       }
     })
-  }).catch(error => {
+  } catch (error) {
     console.log("Error: ", chalk.gray(error.message))
     rl.close()
-  })
+  }
 }
 
 function reWriteAnimeWithEps(episodes) {
@@ -329,7 +335,7 @@ async function scrapeOtakudesu(link) {
     url: link,
     title: "",
     japaneseTitle: "",
-    score: "",
+    score: 0,
     producer: "",
     type: "",
     status: "",
