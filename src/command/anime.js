@@ -226,7 +226,7 @@ function reWriteAnimeWithEps(episodes) {
   console.log(anime)
 }
 
-async function generateEps(recomendedName="titleAnimeName", withConfirm= true) {
+async function generateEps(recomendedName="titleAnimeName") {
     let episodes= []
     console.log(chalk.gray("-".repeat(31)))
     console.log(chalk.red("Cek File In This Directory..."))
@@ -252,34 +252,38 @@ async function generateEps(recomendedName="titleAnimeName", withConfirm= true) {
     console.log(chalk.gray("-".repeat(31)))
     console.log(chalk.red("Rename files"))
     console.log("Recomended: ", chalk.gray(recomendedName + "_1.mp4"))
-    const answerR = withConfirm ? await askQuestion("Rename files(y/t) [/s=spasi]? ") : "y"
-    if(answerR === "y" || answerR === "Y") {
+    const answerR = await askQuestion("Rename files(y/t) [/s=spasi]? ")
+    if(answerR.toLowerCase() !== "y") {
+        return episodes
+    }
+    
+    let continueRen = true
+    
+    while(continueRen) {
         const answerEx = await askQuestion("[search] [value] -r(auto) ? ")
         replaceFileName(answerEx + " -r")
         const answerLop = await askQuestion("Next Rename(y/t)? ")
-        if(answerLop === "y" || answerLop === "Y") {
-            await generateEps(recomendedName, false)
-        } else {
-            console.log("Wait 3S: ", chalk.gray("Wait for changes files"))
-            const newEpisodes = new Promise((resolve) => {
-                setTimeout(() => {
-                    const newEps = []
-                    const newFile = fs.readdirSync("./")
-                    const newVideo = newFile.filter((prev) => prev.includes(".mp4"))
-                    newVideo.forEach((val, idx) => {
-                        newEps.push({
-                            number: idx+1,
-                            url: val
-                        })
-                    })
-                    resolve(newEps)
-                }, 3000) 
-            })
-            return await newEpisodes
+        if(answerLop.toLowerCase() !== "y" ) {
+            continueRen = false
         }
-    } else {
-        return episodes
     }
+
+    console.log("Wait 3S: ", chalk.gray("Wait for changes files"))
+    const newEpisodes = new Promise((resolve) => {
+        setTimeout(() => {
+            const newEps = []
+            const newFile = fs.readdirSync("./")
+            const newVideo = newFile.filter((prev) => prev.includes(".mp4"))
+            newVideo.forEach((val, idx) => {
+                newEps.push({
+                    number: idx+1,
+                    url: val
+                })
+            })
+            resolve(newEps)
+        }, 3000) 
+    })
+    return await newEpisodes
 }
 
 async function downloadImg(url, name) {
