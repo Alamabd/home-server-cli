@@ -226,7 +226,7 @@ function reWriteAnimeWithEps(episodes) {
   console.log(anime)
 }
 
-async function generateEps(recomendedName="titleAnimeName") {
+async function generateEps(recomendedName="titleAnimeName", withConfirm= true) {
     let episodes= []
     console.log(chalk.gray("-".repeat(31)))
     console.log(chalk.red("Cek File In This Directory..."))
@@ -252,13 +252,13 @@ async function generateEps(recomendedName="titleAnimeName") {
     console.log(chalk.gray("-".repeat(31)))
     console.log(chalk.red("Rename files"))
     console.log("Recomended: ", chalk.gray(recomendedName + "_1.mp4"))
-    const answerR = await askQuestion("Rename files(y/t) [/s=spasi]? ")
+    const answerR = withConfirm ? await askQuestion("Rename files(y/t) [/s=spasi]? ") : "y"
     if(answerR === "y" || answerR === "Y") {
         const answerEx = await askQuestion("[search] [value] -r(auto) ? ")
         replaceFileName(answerEx + " -r")
         const answerLop = await askQuestion("Next Rename(y/t)? ")
         if(answerLop === "y" || answerLop === "Y") {
-            await generateEps(recomendedName)
+            await generateEps(recomendedName, false)
         } else {
             console.log("Wait 3S: ", chalk.gray("Wait for changes files"))
             const newEpisodes = new Promise((resolve) => {
